@@ -7,27 +7,18 @@ from rango.forms import PageForm
 
 
 def index(request):
-    # Query the database for a list of ALL categories currently stored.
-    # Order the categories by no. likes in descending order.
-    # Retrieve the top 5 only - or all if less than 5.
-    # Place the list in our context_dict dictionary which will be passed
-    # to the template engine.
 
     category_list = Category.objects.order_by('-likes')[:5]
     page_list = Page.objects.order_by('-views')[:5]
     context_dict = {'categories': category_list, 'pages': page_list}
 
-    #{'boldmessage': "Crunchy, creamy, cookie, candy, cupcake!"}
-
-    # Render response and send it back
     return render(request, 'rango/index.html', context=context_dict)
-        # HttpResponse("Rango says hey there partner! <br/> <a href='/rango/about/'>About</a>")
 
 
 def about(request):
-    context_dict = {'boldmessage': "Sarah!"}
-    return render(request, 'rango/about.html', context=context_dict)
-        # HttpResponse("Rango says here is the about page. <br/> <a href='/rango/'>Index</a>")
+    print(request.method)
+    print(request.user)
+    return render(request, "rango/about.html", {})
 
 
 def show_category(request, category_name_slug):
