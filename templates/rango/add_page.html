@@ -8,6 +8,7 @@
 {% endblock %}}
 
 {% block body_block %}
+
      {% if category %}
         <h1>Add a Page to {{ category.name }}</h1>
         <form id="category_form" method="post"
@@ -26,4 +27,5 @@
     {% else %}
         The specified category does not exist!!!
     {% endif %}
+
 {% endblock %}}
