@@ -75,6 +75,7 @@ def show_category(request, category_name_slug):
     return render(request, 'rango/category.html', context_dict)
 
 
+@login_required()
 def add_category(request):
     form = CategoryForm()
 
@@ -90,6 +91,7 @@ def add_category(request):
     return render(request, 'rango/add_category.html', {'form': form})
 
 
+@login_required()
 def add_page(request, category_name_slug):
     if request.user.is_authenticated():
         try:
@@ -160,6 +162,11 @@ def user_login(request):
                 return HttpResponse("Your Rango account is disabled.")
         else:
             print("Invalid login details: {0}, {1}".format(username, password))
+            if 'username' == username and 'password' != password:
+                return HttpResponse("Password doesn't look right....")
+            elif username != 'username':
+                return HttpResponse("Username does not match any registered users.")
+
             return HttpResponse("Invalid login details supplied.")
 
     else:
