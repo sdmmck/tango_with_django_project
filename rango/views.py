@@ -58,16 +58,15 @@ def about(request):
 
 
 def show_category(request, category_name_slug):
+
     context_dict = {}
 
     try:
         category = Category.objects.get(slug=category_name_slug)
-
         pages = Page.objects.filter(category=category)
-
         context_dict['pages'] = pages
-
         context_dict['category'] = category
+
     except Category.DoesNotExist:
         context_dict['category'] = None
         context_dict['pages'] = None
@@ -93,84 +92,91 @@ def add_category(request):
 
 @login_required()
 def add_page(request, category_name_slug):
-    if request.user.is_authenticated():
-        try:
-            category = Category.objects.get(slug=category_name_slug)
-        except Category.DoesNotExist:
-            category = None
 
-        form = PageForm()
-        if request.method == 'POST':
+    try:
+        category = Category.objects.get(slug=category_name_slug)
+
+    except Category.DoesNotExist:
+        category = None
+
+    form = PageForm()
+
+    if request.method == 'POST':
+        form = PageForm(request.POST)
+
+        if form.is_valid():
+
             if category:
                 page = form.save(commit=False)
                 page.category = category
                 page.views = 0
                 page.save()
+
                 return show_category(request, category_name_slug)
-            else:
-                print(form.errors)
 
-        context_dict = {'form': form, 'category': category}
-        return render(request, 'rango/add_page.html', context_dict)
-    else:
-        return HttpResponseRedirect(reverse('login'))
-
-
-def register(request):
-    registered = False
-
-    if request.method == 'POST':
-        user_form = UserForm(data=request.POST)
-        profile_form = UserProfileForm(data=request.POST)
-
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            user.set_password(user.password)
-            user.save()
-
-            profile = profile_form.save(commit=False)
-            profile.user = user
-
-            if 'picture' in request.FILES:
-                profile.picture = request.FILES['picture']
-
-            profile.save()
-            registered = True
         else:
-            print(user_form.errors, profile_form.errors)
-    else:
-        user_form = UserForm()
-        profile_form = UserProfileForm()
+            print(form.errors)
 
-    return render(request, 'rango/register.html', {'user_form': user_form,
-                                                   'profile_form': profile_form,
-                                                   'registered': registered})
+    context_dict = {'form': form, 'category': category}
+
+    return render(request, 'rango/add_page.html', context_dict)
 
 
-def user_login(request):
-    if request.method == 'POST':
-
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(username=username, password=password)
-
-        if user:
-            if user.is_active:
-                login(request, user)
-                return HttpResponseRedirect(reverse('index'))
-            else:
-                return HttpResponse("Your Rango account is disabled.")
-        else:
-            print("Invalid login details: {0}, {1}".format(username, password))
-            if 'username' == username and 'password' != password:
-                return HttpResponse("Password doesn't look right....")
-            elif username != 'username':
-                return HttpResponse("Username does not match any registered users.")
-
-            return HttpResponse("Invalid login details supplied.")
-
-    else:
-        return render(request, 'rango/login.html', {})
+# def register(request):
+#     registered = False
+#
+#     if request.method == 'POST':
+#         user_form = UserForm(data=request.POST)
+#         profile_form = UserProfileForm(data=request.POST)
+#
+#         if user_form.is_valid() and profile_form.is_valid():
+#             user = user_form.save()
+#             user.set_password(user.password)
+#             user.save()
+#
+#             profile = profile_form.save(commit=False)
+#             profile.user = user
+#
+#             if 'picture' in request.FILES:
+#                 profile.picture = request.FILES['picture']
+#
+#             profile.save()
+#             registered = True
+#         else:
+#             print(user_form.errors, profile_form.errors)
+#     else:
+#         user_form = UserForm()
+#         profile_form = UserProfileForm()
+#
+#     return render(request, 'rango/register.html', {'user_form': user_form,
+#                                                    'profile_form': profile_form,
+#                                                    'registered': registered})
+#
+#
+# def user_login(request):
+#     if request.method == 'POST':
+#
+#         username = request.POST.get('username')
+#         password = request.POST.get('password')
+#         user = authenticate(username=username, password=password)
+#
+#         if user:
+#             if user.is_active:
+#                 login(request, user)
+#                 return HttpResponseRedirect(reverse('index'))
+#             else:
+#                 return HttpResponse("Your Rango account is disabled.")
+#         else:
+#             print("Invalid login details: {0}, {1}".format(username, password))
+#             if 'username' == username and 'password' != password:
+#                 return HttpResponse("Password doesn't look right....")
+#             elif username != 'username':
+#                 return HttpResponse("Username does not match any registered users.")
+#
+#             return HttpResponse("Invalid login details supplied.")
+#
+#     else:
+#         return render(request, 'rango/login.html', {})
 
 
 @login_required()
@@ -180,8 +186,8 @@ def restricted(request):
     else:
         return HttpResponseRedirect(reverse('login'))
 
-
-@login_required()
-def user_logout(request):
-    logout(request)
-    return HttpResponseRedirect(reverse('index'))
+#
+# @login_required()
+# def user_logout(request):
+#     logout(request)
+#     return HttpResponseRedirect(reverse('index'))
